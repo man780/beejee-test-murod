@@ -33,6 +33,12 @@ export default {
     '@nuxtjs/eslint-module'
   ],
 
+  publicRuntimeConfig: {
+    axios: {
+      baseURL: 'https://uxcandy.com/~shapoval/test-task-backend/v2/'
+    }
+  },
+
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: [
     // https://go.nuxtjs.dev/bootstrap
