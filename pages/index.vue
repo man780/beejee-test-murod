@@ -1,5 +1,22 @@
 <template>
   <div>
+    <div>
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input id="username" v-model="form.username" type="text" class="form-control" placeholder="Enter username">
+      </div>
+      <div class="form-group">
+        <label for="email">Email address</label>
+        <input id="email" v-model="form.email" type="email" class="form-control" placeholder="Enter email">
+      </div>
+      <div class="form-group">
+        <label for="text">Text</label>
+        <textarea id="text" v-model="form.text" class="form-control" placeholder="Enter text" />
+      </div>
+      <button type="submit" class="btn btn-primary" @click="creaate()">
+        Submit
+      </button>
+    </div>
     <table class="table">
       <tr>
         <th>Id</th>
@@ -36,19 +53,31 @@
         </td>
       </tr>
     </table>
-    {{ pageCount }}
     <Pagination :page-count="pageCount" />
   </div>
 </template>
 <script>
-import Pagination from '../components/Pagination.vue'
+import Pagination from '@/components/Pagination.vue'
 export default {
   components: { Pagination },
   data () {
     return {
+      form: {
+        username: '',
+        email: '',
+        text: ''
+      },
       sortField: '',
       sortDirection: 'asc',
       pages: []
+    }
+  },
+  async fetch ({ store }) {
+    if (store.getters['tasks/allTasks'].length === 0) {
+      await store.dispatch('tasks/fetch', {
+        sortField: '',
+        sortDirection: ''
+      })
     }
   },
   computed: {
@@ -63,20 +92,26 @@ export default {
     }
   },
   async mounted () {
-    this.tasks = await this.fetchTasks()
+    // this.tasks = await this.$store.getters['tasks/allTasks']
   },
   methods: {
     fetchTasks () {
-      this.pages = []
-      for (let page = 1; page <= this.pageCount; page++) {
-        if (page > this.currentPage - 5 && page < this.currentPage + 5) {
-          this.pages.push(page)
-        }
-      }
+      // this.pages = []
+      // for (let page = 1; page <= this.pageCount; page++) {
+      //   if (page > this.currentPage - 5 && page < this.currentPage + 5) {
+      //     this.pages.push(page)
+      //   }
+      // }
       return this.$store.getters['tasks/allTasks']
     },
     edit (task) {
       console.log(task)
+    },
+    create () {
+      this.$store.dispatch('tasks/createTask', {
+        form: this.form,
+        onTaskCreated: this.onTaskCreated
+      })
     },
     sort (by = '') {
       if (this.sortDirection === 'asc') {
@@ -89,19 +124,6 @@ export default {
         sortDirection: this.sortDirection
       })
       this.tasks = this.$store.getters['tasks/allTasks']
-    },
-    goToPage (pageNumber) {
-      this.$store.dispatch('tasks/fetch', {
-        sortField: this.sortField,
-        sortDirection: this.sortDirection,
-        page: pageNumber
-      })
-      this.pages = []
-      for (let page = 1; page <= this.pageCount; page++) {
-        if (page > pageNumber - 5 && page < pageNumber + 5) {
-          this.pages.push(page)
-        }
-      }
     }
   }
 }
