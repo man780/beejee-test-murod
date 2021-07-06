@@ -1,21 +1,29 @@
 <template>
-  <div>
-    <div>
-      <div class="form-group">
-        <label for="username">Username</label>
-        <input id="username" v-model="form.username" type="text" class="form-control" placeholder="Enter username">
-      </div>
-      <div class="form-group">
-        <label for="email">Email address</label>
-        <input id="email" v-model="form.email" type="email" class="form-control" placeholder="Enter email">
-      </div>
-      <div class="form-group">
-        <label for="text">Text</label>
-        <textarea id="text" v-model="form.text" class="form-control" placeholder="Enter text" />
-      </div>
-      <button type="submit" class="btn btn-primary" @click="creaate()">
-        Submit
+  <div class="container">
+    <div class="alert  alert-dismissible fade show" :class="alertData.class" role="alert" @show="alertData.show">
+      <strong>Status</strong>: {{ alertData.status }}
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
       </button>
+    </div>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input id="username" v-model="form.username" type="text" class="form-control" placeholder="Enter username">
+        </div>
+        <div class="form-group">
+          <label for="email">Email address</label>
+          <input id="email" v-model="form.email" type="email" class="form-control" placeholder="Enter email">
+        </div>
+        <div class="form-group">
+          <label for="text">Text</label>
+          <textarea id="text" v-model="form.text" class="form-control" placeholder="Enter text" />
+        </div>
+        <button type="submit" class="btn btn-primary" @click="create()">
+          Submit
+        </button>
+      </div>
     </div>
     <table class="table">
       <tr>
@@ -62,6 +70,11 @@ export default {
   components: { Pagination },
   data () {
     return {
+      alertData: {
+        status: '',
+        class: '',
+        show: false
+      },
       form: {
         username: '',
         email: '',
@@ -96,22 +109,27 @@ export default {
   },
   methods: {
     fetchTasks () {
-      // this.pages = []
-      // for (let page = 1; page <= this.pageCount; page++) {
-      //   if (page > this.currentPage - 5 && page < this.currentPage + 5) {
-      //     this.pages.push(page)
-      //   }
-      // }
       return this.$store.getters['tasks/allTasks']
     },
     edit (task) {
       console.log(task)
     },
     create () {
+      this.$toast.show('Logging in...')
       this.$store.dispatch('tasks/createTask', {
         form: this.form,
         onTaskCreated: this.onTaskCreated
       })
+    },
+    onTaskCreated (data) {
+      // this.alertData.status = data
+      if (data === 'ok') {
+        // this.$toast.success('Добавлен!')
+        // this.alertData.class = 'alert-success'
+      } else {
+        // this.$toast.error('Ошибка!')
+        // this.alertData.class = 'alert-warning'
+      }
     },
     sort (by = '') {
       if (this.sortDirection === 'asc') {

@@ -14,7 +14,7 @@ export default {
     async fetch ({ commit }, { sortField = '', sortDirection = '', page = 1 }) {
       const tasksData = (
         await this.$axios.$get(
-          this.$axios.defaults.baseURL + '?developer=admin&sort_field=' + sortField + '&sort_direction=' + sortDirection + '&page=' + page
+          this.$axios.defaults.baseURL + '?developer=murod&sort_field=' + sortField + '&sort_direction=' + sortDirection + '&page=' + page
         )
       )
       commit('setTasksData', tasksData)
@@ -22,12 +22,22 @@ export default {
     },
     async createTask ({ commit }, { form, onTaskCreated }) {
       try {
+        const formData = new FormData()
+        formData.append('username', form.username)
+        formData.append('email', form.email)
+        formData.append('text', form.text)
         const created = await this.$axios.post(
-          this.$axios.defaults.baseURL + 'create?developer=admin',
-          form
+          this.$axios.defaults.baseURL + 'create?developer=murod',
+          formData,
+          {
+            headers: {
+              accept: 'application/json'
+            }
+          }
         )
-        commit('createTask', created.message)
-        onTaskCreated(created.message)
+        // console.log(created)
+        commit('createTask', created.data.message)
+        onTaskCreated(created.data.status)
       } catch (error) {
         console.error(error)
       }
@@ -64,6 +74,7 @@ export default {
       state.pageCount = pageCount
     },
     createTask (state, newTask) {
+      console.log(newTask)
       state.tasks.unshift(newTask)
     }
   },
