@@ -31,32 +31,32 @@ export default {
       return this.$store.getters['tasks/getCurrentPage']
     },
     pageCount () {
-      console.log(this.$route.params.pageCount)
+      // console.log(this.$route.params.pageCount)
       return this.$store.getters['tasks/getPageCount']
     }
   },
   mounted () {
-    console.log(this.$route)
+    // console.log(this.$route)
     this.setPages()
   },
   methods: {
     setPages () {
       const currentPage = this.currentPage
-      console.log(this.$route.params)
-      const totalPageCount = this.$route.params.pageCount
+      // console.log(this.$route.params)
+      // const totalPageCount = this.$route.params.pageCount
+      const totalPageCount = 65
       this.prevPage = currentPage > 1 ? (currentPage - 1) : null
       if (!totalPageCount) {
         this.nextpage = currentPage ? (parseInt(currentPage) + 1) : 2
       } else {
         this.nextpage = currentPage < totalPageCount ? (parseInt(currentPage) + 1) : null
       }
-      let _p = 1
+      let _p = 0
       for (let i = 0; i < 7; i++) {
-        console.log(_p, totalPageCount)
         if (currentPage > 4) {
           _p = ((parseInt(currentPage) - 4) + i)
         } else {
-          _p = parseInt(_p) + i
+          _p++
         }
         if (_p > 0 && _p <= totalPageCount) {
           this.pageNumbers.push(_p)
@@ -65,7 +65,7 @@ export default {
           this.pageNumbers.push(null)
         }
       }
-      console.log(this.pageNumbers)
+      // console.log(this.pageNumbers)
     },
     goToPage (pageNumber) {
       this.$store.dispatch('tasks/fetch', {
@@ -79,7 +79,7 @@ export default {
       this.$store.dispatch('tasks/fetch', {
         sortField: this.sortField,
         sortDirection: this.sortDirection,
-        page: this.nextPage
+        page: this.prevPage
       })
       this.tasks = this.$store.getters['tasks/allTasks']
     },
