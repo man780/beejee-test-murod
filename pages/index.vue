@@ -1,27 +1,24 @@
 <template>
   <div class="container">
-    <div class="alert  alert-dismissible fade show" :class="alertData.class" role="alert" @show="alertData.show">
-      <strong>Status</strong>: {{ alertData.status }}
-      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-      </button>
-    </div>
     <div class="row">
-      <div class="col-md-6">
-        <div class="form-group">
-          <label for="username">Username</label>
-          <input id="username" v-model="form.username" type="text" class="form-control" placeholder="Enter username">
-        </div>
-        <div class="form-group">
-          <label for="email">Email address</label>
-          <input id="email" v-model="form.email" type="email" class="form-control" placeholder="Enter email">
+      <div class="col-md-6 card">
+        <h1>Create</h1>
+        <div class="form-row">
+          <div class="form-group col-md-6">
+            <label for="username">Username</label>
+            <input id="username" v-model="form.username" type="text" class="form-control" placeholder="Enter username">
+          </div>
+          <div class="form-group col-md-6">
+            <label for="email">Email address</label>
+            <input id="email" v-model="form.email" type="email" class="form-control" placeholder="Enter email">
+          </div>
         </div>
         <div class="form-group">
           <label for="text">Text</label>
           <textarea id="text" v-model="form.text" class="form-control" placeholder="Enter text" />
         </div>
         <button type="submit" class="btn btn-primary" @click="create()">
-          Submit
+          Create
         </button>
       </div>
     </div>
@@ -115,7 +112,7 @@ export default {
       console.log(task)
     },
     create () {
-      this.$toast.show('Logging in...')
+      this.$toast.show('Добавление...').goAway(1000)
       this.$store.dispatch('tasks/createTask', {
         form: this.form,
         onTaskCreated: this.onTaskCreated
@@ -124,10 +121,10 @@ export default {
     onTaskCreated (data) {
       // this.alertData.status = data
       if (data === 'ok') {
-        // this.$toast.success('Добавлен!')
+        this.$toast.success('Добавлен!').goAway(2000)
         // this.alertData.class = 'alert-success'
       } else {
-        // this.$toast.error('Ошибка!')
+        this.$toast.error('Ошибка!').goAway(2000)
         // this.alertData.class = 'alert-warning'
       }
     },
