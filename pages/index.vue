@@ -21,6 +21,34 @@
           Create
         </button>
       </div>
+      <div class="col-md-6 card">
+        <h1>Edit</h1>
+        <div class="form-row">
+          <div class="form-group col-md-6">
+            <label for="username">Username</label>
+            <input id="username" v-model="editForm.username" :disabled="true" type="text" class="form-control">
+          </div>
+          <div class="form-group col-md-6">
+            <label for="email">Email address</label>
+            <input id="email" v-model="editForm.email" :disabled="true" type="email" class="form-control">
+          </div>
+        </div>
+        <select v-model="editForm.status" class="form-control form-control-lg">
+          <option value="">
+            ...
+          </option>
+          <option v-for="status in statuses" :key="status.id" :value="status.id">
+            {{ status.text }}
+          </option>
+        </select>
+        <div class="form-group">
+          <label for="text">Text</label>
+          <textarea id="text" v-model="editForm.text" class="form-control" placeholder="Enter text" />
+        </div>
+        <button type="submit" class="btn btn-primary" @click="edit()">
+          Edit
+        </button>
+      </div>
     </div>
     <table class="table">
       <tr>
@@ -51,7 +79,7 @@
         <td>{{ task.status }}</td>
         <td>
           <div class="edit-buttons">
-            <button class="btn btn-success" @click="edit(task)">
+            <button class="btn btn-success" @click="editBtn(task)">
               <p>Изменить</p>
             </button>
           </div>
@@ -72,10 +100,30 @@ export default {
         class: '',
         show: false
       },
+      statuses: [
+        {
+          id: 0, text: 'задача не выполнена'
+        },
+        {
+          id: 1, text: 'задача не выполнена, отредактирована админом'
+        },
+        {
+          id: 10, text: 'задача выполнена'
+        },
+        {
+          id: 11, text: 'задача отредактирована админом и выполнена'
+        }
+      ],
       form: {
         username: '',
         email: '',
         text: ''
+      },
+      editForm: {
+        username: '',
+        email: '',
+        text: '',
+        status: 0
       },
       sortField: '',
       sortDirection: 'asc',
@@ -108,8 +156,23 @@ export default {
     fetchTasks () {
       return this.$store.getters['tasks/allTasks']
     },
+    editBtn (task) {
+      this.editForm = task
+    },
     edit (task) {
-      console.log(task)
+      this.$toast.show('Редактирование...').goAway(1000)
+      // this.$store.dispatch('tasks/editTask', {
+      //   task: task,
+      //   form: this.editForm,
+      //   onTaskEdited: this.onTaskEdited
+      // })
+    },
+    onTaskEdited (data) {
+      if (data === 'ok') {
+        this.$toast.success('Изминен!').goAway(2000)
+      } else {
+        this.$toast.error('Ошибка!').goAway(2000)
+      }
     },
     create () {
       this.$toast.show('Добавление...').goAway(1000)
@@ -119,13 +182,10 @@ export default {
       })
     },
     onTaskCreated (data) {
-      // this.alertData.status = data
       if (data === 'ok') {
         this.$toast.success('Добавлен!').goAway(2000)
-        // this.alertData.class = 'alert-success'
       } else {
         this.$toast.error('Ошибка!').goAway(2000)
-        // this.alertData.class = 'alert-warning'
       }
     },
     sort (by = '') {
