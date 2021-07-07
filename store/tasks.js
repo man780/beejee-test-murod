@@ -45,7 +45,7 @@ export default {
         this.$toast.error('Ошибка... ' + error).goAway(10000)
       }
     },
-    async login ({ commit }) {
+    async login () {
       try {
         const formData = new FormData()
         formData.append('username', 'admin')
@@ -60,11 +60,11 @@ export default {
           }
         )
         if (loginData.data.status === 'ok') {
-          commit('setToken', loginData.data.message.token)
           this.$cookies.set('token', loginData.data.message.token, {
             path: '/',
             maxAge: 60 * 60 * 24
           })
+          this.$toast.success('Вы вошли как murod').goAway(5000)
         } else {
           this.$toast.error('Ошибка авторизации... ' + loginData.data.message).goAway(10000)
         }
@@ -72,7 +72,11 @@ export default {
         this.$toast.error('Ошибка авторизации... ' + error).goAway(10000)
       }
     },
-    async editTask ({ taskId, text, onTaskEdited }) {
+    async editTask ({ commit }, { taskId, text }) {
+      if (this.$cookies.get('token') === undefined) {
+        this.$toast.error('Авторизуйтесь').goAway(10000)
+        return
+      }
       try {
         const formData = new FormData()
         formData.append('text', text)
@@ -108,9 +112,6 @@ export default {
         state.pageCount = Math.ceil(tasksData.message.total_task_count / 3)
         // this.commit('setPageCount', Math.ceil(tasksData.message.total_task_count / 3))
       }
-    },
-    setToken (state, token) {
-      state.token = token
     },
     setCurrentPage (state, currentPage) {
       state.currentPage = currentPage

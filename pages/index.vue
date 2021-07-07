@@ -33,30 +33,24 @@
             <input id="edit-email" v-model="editForm.email" :disabled="true" type="email" class="form-control">
           </div>
         </div>
-        <select v-model="editForm.status" class="form-control form-control-lg">
-          <option value="">
-            ...
-          </option>
-          <option v-for="status in statuses" :key="status.id" :value="status.id">
-            {{ status.text }}
-          </option>
-        </select>
         <div class="form-group">
           <label for="text">Text</label>
           <textarea id="text" :value="editForm.text" class="form-control" placeholder="Enter text" @input="updateText" />
         </div>
-        <button type="submit" class="btn btn-primary" @click="edit()">
+        <button type="submit" class="btn btn-success" @click="edit()">
           Edit
         </button>
       </div>
     </div>
+    <hr>
     <div class="row">
       <div class="col">
-        <a href="javascript:void(0);" class="btn btn-primary" @click="login()">
+        <a href="javascript:void(0);" class="btn btn-info" @click="login()">
           Log in
         </a>
       </div>
     </div>
+    <hr>
     <table class="table">
       <thead>
         <tr>
@@ -141,20 +135,6 @@ export default {
         class: '',
         show: false
       },
-      statuses: [
-        {
-          id: 0, text: 'задача не выполнена'
-        },
-        {
-          id: 1, text: 'задача не выполнена, отредактирована админом'
-        },
-        {
-          id: 10, text: 'задача выполнена'
-        },
-        {
-          id: 11, text: 'задача отредактирована админом и выполнена'
-        }
-      ],
       form: {
         username: '',
         email: '',
