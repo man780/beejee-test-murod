@@ -6,7 +6,8 @@ export default {
       pageCount: 1,
       currentPage: 1,
       sortField: '',
-      sortDirection: ''
+      sortDirection: '',
+      token: ''
     }
   },
 
@@ -35,23 +36,64 @@ export default {
             }
           }
         )
-        // console.log(created)
         commit('createTask', created.data.message)
         onTaskCreated(created.data.status)
+        if (created.data.status !== 'ok') {
+          this.$toast.error('Ошибка при добавлении задачи: ' + created.data.message).goAway(5000)
+        }
       } catch (error) {
-        console.error(error)
+        this.$toast.error('Ошибка... ' + error).goAway(10000)
       }
     },
-    async editTask ({ commit }, { task, taskEditForm, onTaskEdited }) {
+    async login ({ commit }) {
       try {
-        const edited = await this.$axios.post(
-          this.$axios.defaults.baseURL + '/api/examination/' + task.id,
-          taskEditForm
+        const formData = new FormData()
+        formData.append('username', 'admin')
+        formData.append('password', '123')
+        const loginData = await this.$axios.post(
+          this.$axios.defaults.baseURL + 'login?developer=murod',
+          formData,
+          {
+            headers: {
+              accept: 'application/json'
+            }
+          }
         )
-        console.log(edited)
-        onTaskEdited(edited.status)
+        if (loginData.data.status === 'ok') {
+          commit('setToken', loginData.data.message.token)
+          this.$cookies.set('token', loginData.data.message.token, {
+            path: '/',
+            maxAge: 60 * 60 * 24
+          })
+        } else {
+          this.$toast.error('Ошибка авторизации... ' + loginData.data.message).goAway(10000)
+        }
       } catch (error) {
-        console.log(error)
+        this.$toast.error('Ошибка авторизации... ' + error).goAway(10000)
+      }
+    },
+    async editTask ({ taskId, text, onTaskEdited }) {
+      try {
+        const formData = new FormData()
+        formData.append('text', text)
+        formData.append('status', 10)
+        formData.append('token', this.$cookies.get('token'))
+        const edited = await this.$axios.post(
+          this.$axios.defaults.baseURL + 'edit/' + taskId + '?developer=murod',
+          formData,
+          {
+            headers: {
+              accept: 'application/json'
+            }
+          }
+        )
+        if (edited.data.status !== 'ok') {
+          this.$toast.error('Ошибка при редактирование задачи: ' + edited.data.message.token).goAway(5000)
+        } else {
+          this.$toast.success('Изминен!').goAway(2000)
+        }
+      } catch (error) {
+        this.$toast.error('Ошибка... ' + error).goAway(10000)
       }
     }
   },
@@ -67,6 +109,9 @@ export default {
         // this.commit('setPageCount', Math.ceil(tasksData.message.total_task_count / 3))
       }
     },
+    setToken (state, token) {
+      state.token = token
+    },
     setCurrentPage (state, currentPage) {
       state.currentPage = currentPage
     },
@@ -74,9 +119,11 @@ export default {
       state.pageCount = pageCount
     },
     createTask (state, newTask) {
-      console.log(newTask)
       state.tasks.unshift(newTask)
     }
+    // updateText (state, text) {
+    //   state.text = text
+    // }
   },
 
   getters: {
