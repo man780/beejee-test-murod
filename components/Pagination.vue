@@ -3,13 +3,13 @@
     <nav aria-label="Page navigation">
       <ul class="pagination">
         <li class="page-item">
-          <a class="page-link" href="#" @click="goPrevPage(page)">Previous</a>
+          <a class="page-link" href="javascript:void(0);" @click="goPrevPage()">Previous</a>
         </li>
-        <li v-for="page in pageNumbers" :key="page" class="page-item">
-          <a class="page-link active" href="#" @click="goToPage(page)">{{ page }}</a>
+        <li v-for="page in pageNumbers" :key="page" :class="{ active: (currentPage == page) }" class="page-item">
+          <a class="page-link active" href="javascript:void(0);" @click="goToPage(page)">{{ page }}</a>
         </li>
         <li class="page-item">
-          <a class="page-link" href="#" @click="goNextPage(page)">Next</a>
+          <a class="page-link" href="javascript:void(0);" @click="goNextPage()">Next</a>
         </li>
       </ul>
     </nav>
@@ -31,43 +31,32 @@ export default {
       return this.$store.getters['tasks/getCurrentPage']
     },
     pageCount () {
-      // console.log(this.$route.params.pageCount)
       return this.$store.getters['tasks/getPageCount']
     }
   },
   mounted () {
-    // console.log(this.$route)
-    this.setPages()
+    this.setPages(1)
   },
   methods: {
-    setPages () {
-      const currentPage = this.currentPage
-      // console.log(this.$route.params)
-      // const totalPageCount = this.$route.params.pageCount
-      const totalPageCount = 65
-      this.prevPage = currentPage > 1 ? (currentPage - 1) : null
-      if (!totalPageCount) {
-        this.nextpage = currentPage ? (parseInt(currentPage) + 1) : 2
-      } else {
-        this.nextpage = currentPage < totalPageCount ? (parseInt(currentPage) + 1) : null
-      }
+    setPages (choosedPage = 1) {
+      const totalPageCount = this.pageCount
+      const maxLoopInt = (totalPageCount > 19) ? 19 : totalPageCount
       let _p = 0
-      for (let i = 0; i < 7; i++) {
-        if (currentPage > 4) {
-          _p = ((parseInt(currentPage) - 4) + i)
+      this.pageNumbers = []
+      for (let i = 0; i < maxLoopInt; i++) {
+        if (choosedPage > 9) {
+          _p = (choosedPage - 9) + i
         } else {
           _p++
         }
         if (_p > 0 && _p <= totalPageCount) {
           this.pageNumbers.push(_p)
-          // this.pageNumberCount++
         } else {
           this.pageNumbers.push(null)
         }
       }
-      // console.log(this.pageNumbers)
     },
-    goToPage (pageNumber) {
+    fetchTasks (pageNumber) {
       this.$store.dispatch('tasks/fetch', {
         sortField: this.sortField,
         sortDirection: this.sortDirection,
@@ -75,21 +64,25 @@ export default {
       })
       this.tasks = this.$store.getters['tasks/allTasks']
     },
+    goToPage (pageNumber) {
+      this.fetchTasks(pageNumber)
+      this.setPages(pageNumber)
+    },
     goPrevPage () {
-      this.$store.dispatch('tasks/fetch', {
-        sortField: this.sortField,
-        sortDirection: this.sortDirection,
-        page: this.prevPage
-      })
-      this.tasks = this.$store.getters['tasks/allTasks']
+      this.prevPage = this.currentPage > 1 ? (this.currentPage - 1) : null
+      this.fetchTasks(this.prevPage)
+      this.setPages(this.prevPage)
     },
     goNextPage () {
-      this.$store.dispatch('tasks/fetch', {
-        sortField: this.sortField,
-        sortDirection: this.sortDirection,
-        page: this.nextPage
-      })
-      this.tasks = this.$store.getters['tasks/allTasks']
+      const currentPage = this.currentPage
+      const totalPageCount = this.pageCount
+      if (!totalPageCount) {
+        this.nextPage = currentPage ? (parseInt(currentPage) + 1) : 2
+      } else {
+        this.nextPage = currentPage < totalPageCount ? (parseInt(currentPage) + 1) : null
+      }
+      this.fetchTasks(this.nextPage)
+      this.setPages(this.nextPage)
     }
   }
 }

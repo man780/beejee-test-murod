@@ -106,12 +106,11 @@ export default {
     setTasksData (state, tasksData) {
       state.tasks = tasksData.message.tasks
       if (tasksData.message.total_task_count % 3 === 0) {
-        // state.pageCount = tasksData.message.total_task_count / 3
-        this.commit('setPageCount', tasksData.message.total_task_count / 3)
+        state.pageCount = tasksData.message.total_task_count / 3
       } else {
         state.pageCount = Math.ceil(tasksData.message.total_task_count / 3)
-        // this.commit('setPageCount', Math.ceil(tasksData.message.total_task_count / 3))
       }
+      // console.log(state.pageCount)
     },
     setCurrentPage (state, currentPage) {
       state.currentPage = currentPage
