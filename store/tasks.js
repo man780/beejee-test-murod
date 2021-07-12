@@ -27,6 +27,10 @@ export default {
         formData.append('username', form.username)
         formData.append('email', form.email)
         formData.append('text', form.text)
+        // if (!this.validate(formData)) {
+        //   this.$toast.error('Ошибка: Заполните все поля').goAway(5000)
+        //   return
+        // }
         const created = await this.$axios.post(
           this.$axios.defaults.baseURL + 'create?developer=murod',
           formData,

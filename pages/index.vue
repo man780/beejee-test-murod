@@ -6,16 +6,30 @@
         <div class="form-row">
           <div class="form-group col-md-6">
             <label for="username">Username</label>
-            <input id="username" v-model="form.username" type="text" class="form-control" placeholder="Enter username">
+            <input
+              id="username"
+              v-model="form.username.text"
+              type="text"
+              class="form-control"
+              placeholder="Enter username"
+              :class="form.username.isInvalid ? 'is-invalid' : ''"
+            >
           </div>
           <div class="form-group col-md-6">
             <label for="email">Email address</label>
-            <input id="email" v-model="form.email" type="email" class="form-control" placeholder="Enter email">
+            <input
+              id="email"
+              v-model="form.email.text"
+              type="email"
+              class="form-control"
+              placeholder="Enter email"
+              :class="form.email.isInvalid ? 'is-invalid' : ''"
+            >
           </div>
         </div>
         <div class="form-group">
           <label for="text">Text</label>
-          <textarea id="text" v-model="form.text" class="form-control" placeholder="Enter text" />
+          <textarea id="text" v-model="form.text.text" class="form-control" placeholder="Enter text" :class="form.text.isInvalid ? 'is-invalid' : ''" />
         </div>
         <button type="submit" class="btn btn-primary" @click="create()">
           Create
@@ -43,6 +57,37 @@
       </div>
     </div>
     <hr>
+    <!-- Button to open the modal login form -->
+    <button onclick="document.getElementById('id01').style.display='block'" class="btn btn-success">
+      Login
+    </button>
+    <!-- The Modal -->
+    <div id="id01" class="modal">
+      <span onclick="document.getElementById('id01').style.display='none'" class="close" title="Close Modal">&times;</span>
+
+      <!-- Modal Content -->
+      <form class="modal-content animate">
+        <div class="container">
+          <h1 class="text-center">
+            Log In
+          </h1>
+          <div class="form-group">
+            <label for="auth-username">Username</label>
+            <input id="auth-username" type="text" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="auth-password">Password</label>
+            <input id="auth-password" type="password" class="form-control">
+          </div>
+          <div class="form-group">
+            <button type="submit" class="btn btn-success">
+              Login
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+
     <div class="row">
       <div class="col">
         <a href="javascript:void(0);" class="btn btn-info" @click="login()">
@@ -130,15 +175,19 @@ export default {
   data () {
     return {
       text: '',
-      alertData: {
-        status: '',
-        class: '',
-        show: false
-      },
       form: {
-        username: '',
-        email: '',
-        text: ''
+        username: {
+          text: '',
+          isInvalid: false
+        },
+        email: {
+          text: '',
+          isInvalid: false
+        },
+        text: {
+          text: '',
+          isInvalid: false
+        }
       },
       editForm: {
         username: '',
@@ -181,7 +230,7 @@ export default {
       this.$store.dispatch('tasks/login')
     },
     updateText (e) {
-      // Что-бы не выходила changingnot in mutation
+      // Что-бы не выходила changing not in mutation
       this.text = e.target.value
     },
     edit () {
@@ -191,10 +240,36 @@ export default {
         text: this.text
       })
     },
+    validate (formData) {
+      if (formData.username.text.trim() === '') {
+        this.form.username.isInvalid = true
+        return false
+      }
+      if (formData.email.text.trim() === '') {
+        this.form.email.isInvalid = true
+        return false
+      }
+      if (formData.text.text.trim() === '') {
+        this.form.text.isInvalid = true
+        return false
+      }
+      this.form.username.isInvalid = false
+      this.form.email.isInvalid = false
+      this.form.text.isInvalid = false
+      return true
+    },
     create () {
       this.$toast.show('Добавление...').goAway(1000)
+      if (!this.validate(this.form)) {
+        this.$toast.error('Ошибка: Заполните все поля!').goAway(2000)
+        return false
+      }
       this.$store.dispatch('tasks/createTask', {
-        form: this.form,
+        form: {
+          username: this.form.username.text,
+          email: this.form.email.text,
+          text: this.form.text.text
+        },
         onTaskCreated: this.onTaskCreated
       })
     },
@@ -221,5 +296,60 @@ export default {
 }
 </script>
 <style scoped>
+/* The Modal (background) */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  padding-top: 60px;
+}
 
+/* Modal Content/Box */
+.modal-content {
+  background-color: #fefefe;
+  margin: 5px auto; /* 15% from the top and centered */
+  border: 1px solid #888;
+  width: 50%; /* Could be more or less, depending on screen size */
+}
+
+/* The Close Button */
+.close {
+  /* Position it in the top right corner outside of the modal */
+  position: absolute;
+  right: 25px;
+  top: 0;
+  color: #000;
+  font-size: 35px;
+  font-weight: bold;
+}
+
+/* Close button on hover */
+.close:hover,
+.close:focus {
+  color: red;
+  cursor: pointer;
+}
+
+/* Add Zoom Animation */
+.animate {
+  -webkit-animation: animatezoom 0.6s;
+  animation: animatezoom 0.6s
+}
+
+@-webkit-keyframes animatezoom {
+  from {-webkit-transform: scale(0)}
+  to {-webkit-transform: scale(1)}
+}
+
+@keyframes animatezoom {
+  from {transform: scale(0)}
+  to {transform: scale(1)}
+}
 </style>
