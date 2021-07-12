@@ -58,43 +58,43 @@
     </div>
     <hr>
     <!-- Button to open the modal login form -->
-    <button onclick="document.getElementById('id01').style.display='block'" class="btn btn-success">
-      Login
-    </button>
+    <div class="row">
+      <div class="col">
+        <button v-show="!$cookies.get('username') && !isLoggedIn" onclick="document.getElementById('id01').style.display='block'" class="btn btn-success">
+          Log In
+        </button>
+        <button v-show="$cookies.get('username') && isLoggedIn" class="btn btn-danger" @click="logout()">
+          ({{ $cookies.get('username') }}) Log Out
+        </button>
+      </div>
+    </div>
     <!-- The Modal -->
     <div id="id01" class="modal">
       <span onclick="document.getElementById('id01').style.display='none'" class="close" title="Close Modal">&times;</span>
 
       <!-- Modal Content -->
-      <form class="modal-content animate">
+      <div class="modal-content animate">
         <div class="container">
           <h1 class="text-center">
             Log In
           </h1>
           <div class="form-group">
             <label for="auth-username">Username</label>
-            <input id="auth-username" type="text" class="form-control">
+            <input id="auth-username" v-model="auth.username.text" type="text" class="form-control" :class="auth.username.isInvalid ? 'is-invalid' : ''">
           </div>
           <div class="form-group">
             <label for="auth-password">Password</label>
-            <input id="auth-password" type="password" class="form-control">
+            <input id="auth-password" v-model="auth.password.text" type="password" class="form-control" :class="auth.password.isInvalid ? 'is-invalid' : ''">
           </div>
           <div class="form-group">
-            <button type="submit" class="btn btn-success">
+            <button class="btn btn-success" @click="login()">
               Login
             </button>
           </div>
         </div>
-      </form>
-    </div>
-
-    <div class="row">
-      <div class="col">
-        <a href="javascript:void(0);" class="btn btn-info" @click="login()">
-          Log in
-        </a>
       </div>
     </div>
+
     <hr>
     <table class="table">
       <thead>
@@ -175,6 +175,7 @@ export default {
   data () {
     return {
       text: '',
+      isLoggedIn: this.$cookies.get('username'),
       form: {
         username: {
           text: '',
@@ -185,6 +186,16 @@ export default {
           isInvalid: false
         },
         text: {
+          text: '',
+          isInvalid: false
+        }
+      },
+      auth: {
+        username: {
+          text: '',
+          isInvalid: false
+        },
+        password: {
           text: '',
           isInvalid: false
         }
@@ -226,8 +237,36 @@ export default {
     editBtn (task) {
       this.editForm = task
     },
+    logout () {
+      this.$store.dispatch('tasks/logout')
+      this.isLoggedIn = false
+    },
+    validateLoginForm () {
+      if (this.auth.username.text.trim() !== 'admin') {
+        this.$toast.error('Ошибка: Не верный логин!').goAway(2000)
+        this.auth.username.isInvalid = true
+        return false
+      }
+      if (this.auth.password.text.trim() !== '123') {
+        this.$toast.error('Ошибка: Не верный пароль!').goAway(2000)
+        this.auth.password.isInvalid = true
+        return false
+      }
+      return true
+    },
     login () {
-      this.$store.dispatch('tasks/login')
+      if (!this.validateLoginForm()) {
+        document.getElementById('id01').style.display = 'block'
+        return false
+      }
+      this.$store.dispatch('tasks/login', {
+        form: {
+          username: this.auth.username.text,
+          password: this.auth.password.text
+        }
+      })
+      this.isLoggedIn = true
+      document.getElementById('id01').style.display = 'none'
     },
     updateText (e) {
       // Что-бы не выходила changing not in mutation

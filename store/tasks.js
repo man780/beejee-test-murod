@@ -27,10 +27,6 @@ export default {
         formData.append('username', form.username)
         formData.append('email', form.email)
         formData.append('text', form.text)
-        // if (!this.validate(formData)) {
-        //   this.$toast.error('Ошибка: Заполните все поля').goAway(5000)
-        //   return
-        // }
         const created = await this.$axios.post(
           this.$axios.defaults.baseURL + 'create?developer=murod',
           formData,
@@ -49,11 +45,11 @@ export default {
         this.$toast.error('Ошибка... ' + error).goAway(10000)
       }
     },
-    async login () {
+    async login ({ commit }, { form }) {
       try {
         const formData = new FormData()
-        formData.append('username', 'admin')
-        formData.append('password', '123')
+        formData.append('username', form.username)
+        formData.append('password', form.password)
         const loginData = await this.$axios.post(
           this.$axios.defaults.baseURL + 'login?developer=murod',
           formData,
@@ -68,6 +64,10 @@ export default {
             path: '/',
             maxAge: 60 * 60 * 24
           })
+          this.$cookies.set('username', 'admin', {
+            path: '/',
+            maxAge: 60 * 60 * 24
+          })
           this.$toast.success('Вы вошли как murod').goAway(5000)
         } else {
           this.$toast.error('Ошибка авторизации... ' + loginData.data.message).goAway(10000)
@@ -75,6 +75,10 @@ export default {
       } catch (error) {
         this.$toast.error('Ошибка авторизации... ' + error).goAway(10000)
       }
+    },
+    logout ({ commit }) {
+      this.$cookies.remove('token')
+      this.$cookies.remove('username')
     },
     async editTask ({ commit }, { taskId, text }) {
       if (this.$cookies.get('token') === undefined) {
@@ -125,9 +129,6 @@ export default {
     createTask (state, newTask) {
       state.tasks.unshift(newTask)
     }
-    // updateText (state, text) {
-    //   state.text = text
-    // }
   },
 
   getters: {
