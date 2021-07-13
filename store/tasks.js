@@ -80,15 +80,23 @@ export default {
       this.$cookies.remove('token')
       this.$cookies.remove('username')
     },
-    async editTask ({ commit }, { taskId, text }) {
+    async editTask ({ commit }, { taskId, text, status, editing }) {
       if (this.$cookies.get('token') === undefined) {
         this.$toast.error('Авторизуйтесь').goAway(10000)
         return
       }
       try {
         const formData = new FormData()
-        formData.append('text', text)
-        formData.append('status', 10)
+        let s = 0
+        if (editing) {
+          // При редактировании текста
+          formData.append('text', text)
+          s = (status === 0) ? 1 : 11
+        } else {
+          // При нажатии на кнопку выполнмть
+          s = (status === 0) ? 10 : 11
+        }
+        formData.append('status', s)
         formData.append('token', this.$cookies.get('token'))
         const edited = await this.$axios.post(
           this.$axios.defaults.baseURL + 'edit/' + taskId + '?developer=murod',

@@ -126,34 +126,16 @@
           <td>{{ task.email }}</td>
           <td>{{ task.text }}</td>
           <td>
-            <svg
-              v-if="task.status==0"
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              fill="currentColor"
-              class="bi bi-journal-x"
-              viewBox="0 0 24 24"
-              style="color:red"
+            <b-button
+              v-b-tooltip.hover
+              title="Выполнить"
+              :class="statusClasses[task.status]"
+              class="btn"
+              href="javascript:void(0)"
+              @click="setStatusDone(task)"
             >
-              <path fill-rule="evenodd" d="M6.146 6.146a.5.5 0 0 1 .708 0L8 7.293l1.146-1.147a.5.5 0 1 1 .708.708L8.707 8l1.147 1.146a.5.5 0 0 1-.708.708L8 8.707 6.854 9.854a.5.5 0 0 1-.708-.708L7.293 8 6.146 6.854a.5.5 0 0 1 0-.708z" />
-              <path d="M3 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-1h1v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v1H1V2a2 2 0 0 1 2-2z" />
-              <path d="M1 5v-.5a.5.5 0 0 1 1 0V5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0V8h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0v.5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1z" />
-            </svg>
-            <svg
-              v-if="task.status==10"
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              fill="currentColor"
-              class="bi bi-journal-check"
-              viewBox="0 0 24 24"
-              style="color:green"
-            >
-              <path fill-rule="evenodd" d="M10.854 6.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7.5 8.793l2.646-2.647a.5.5 0 0 1 .708 0z" />
-              <path d="M3 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-1h1v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v1H1V2a2 2 0 0 1 2-2z" />
-              <path d="M1 5v-.5a.5.5 0 0 1 1 0V5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0V8h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0v.5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1z" />
-            </svg>
+              {{ statuses[task.status] }}
+            </b-button>
           </td>
           <td>
             <div class="edit-buttons">
@@ -176,6 +158,18 @@ export default {
     return {
       text: '',
       isLoggedIn: this.$cookies.get('username'),
+      statuses: {
+        0: 'задача не выполнена',
+        1: 'задача не выполнена, отредактирована админом',
+        10: 'задача выполнена',
+        11: 'задача отредактирована админом и выполнена'
+      },
+      statusClasses: {
+        0: 'btn-danger',
+        1: 'btn-warning',
+        10: 'btn-info',
+        11: 'btn-primary'
+      },
       form: {
         username: {
           text: '',
@@ -276,7 +270,21 @@ export default {
       this.$toast.show('Редактирование...').goAway(1000)
       this.$store.dispatch('tasks/editTask', {
         taskId: this.editForm.id,
-        text: this.text
+        text: this.text,
+        status: this.editForm.status,
+        editing: true
+      })
+    },
+    setStatusDone (task) {
+      if (task.status >= 10) {
+        this.$toast.error('Задача уже выполнена!').goAway(1000)
+        return false
+      }
+      this.$toast.show('Выполнение...').goAway(1000)
+      this.$store.dispatch('tasks/editTask', {
+        taskId: task.id,
+        status: task.status,
+        editing: false
       })
     },
     validate (formData) {
